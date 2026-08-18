@@ -1,7 +1,7 @@
 # SIH 2026
 <h1 align="center">Multisource Disaster Intelligence System</h1>
 
-<p align="center">This software streamlines the process of gathering and categorizing disaster related data from various soucres, significantly reducing the time required for response efforts by providing real-time insights and actionable information, the software will enhance the effectiveness of disaster response operations, ultimately saving lives.</p>
+<p align="center">This software streamlines the process of gathering and categorizing disaster related data from various sources, significantly reducing the time required for response efforts by providing real-time insights and actionable information, the software will enhance the effectiveness of disaster response operations, ultimately saving lives.</p>
 
 ## Links
 
@@ -33,11 +33,11 @@
 
 **Swayam Gupta** (Frontend)
 - [Profile](https://github.com/SwayamGupta1001 "Swayam_Gupta")
-- [Email]
+- [Email](mailto:swayamgupta1019@gmail.com?subject=Hi "Hi!")
 
 **Nency Patel** (Backend)
 - [Profile](https://github.com/nencypatel16 "Nency_Patel")
-- [Email]
+- [Email](mailto:nencypatel.1603@gmail.com?subject=Hi "Hi!")
 
 **Ikjot Singh** (Frontend)
 - [Profile](https://github.com/RottenCheesy "Ikjot_Singh")
@@ -47,11 +47,11 @@
 
 **Pal Patel** (Research)
 - [Profile](https://github.com/palpatel2311 "Pal_Patel")
-- [Email]
+- [Email](mailto:palpatel2311@gmail.com?subject=Hi "Hi!")
 
 **Samaiera** (Research + Presentation)
 - [Profile](https://github.com/Samaiera "Samaiera")
-- [Email]
+- [Email](mailto:samaieraali@gmail.com?subject=Hi "Hi!")
 
 ## 🤝 Support
 
