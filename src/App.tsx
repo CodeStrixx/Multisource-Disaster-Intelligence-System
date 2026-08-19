@@ -9,6 +9,8 @@ import {
 
 import { DisasterEvent, IncidentReport, ReliefResource, Alert, LocationCoordinates } from './types/disaster';
 
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+
 import { Header } from './components/common/Header';
 import { BottomNav } from './components/common/BottomNav';
 
@@ -28,12 +30,15 @@ import { ReportSubmittedModal } from './components/modals/ReportSubmittedModal';
 import { ResourceDetailModal } from './components/modals/ResourceDetailModal';
 import { AlertDetailModal } from './components/modals/AlertDetailModal';
 
-export function App() {
+// Inner app uses the theme context
+function AppInner() {
+  const { isDark, toggleTheme } = useTheme();
+
   // Navigation & Screen View State
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   
   // Location State
-  const [currentLocation, setCurrentLocation] = useState<LocationCoordinates>(INITIAL_LOCATIONS[0]); // Ahmedabad default
+  const [currentLocation, setCurrentLocation] = useState<LocationCoordinates>(INITIAL_LOCATIONS[0]);
   const [savedLocations, setSavedLocations] = useState<LocationCoordinates[]>(INITIAL_LOCATIONS);
 
   // Core Data State
@@ -69,7 +74,6 @@ export function App() {
   };
 
   const handleSelectAlert = (alertItem: Alert) => {
-    // Mark as read
     setAlerts((prev) => prev.map((a) => (a.id === alertItem.id ? { ...a, read: true } : a)));
     setSelectedAlert(alertItem);
   };
@@ -93,8 +97,11 @@ export function App() {
     setAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
   };
 
+  const rootBg = isDark ? 'bg-ops-bg tech-grid' : 'bg-day-bg tech-grid';
+  const textColor = isDark ? 'text-ops-text' : 'text-day-text';
+
   return (
-    <div className="min-h-screen bg-surface-bg flex flex-col font-sans pb-16 lg:pb-0">
+    <div className={`min-h-screen ${rootBg} ${textColor} flex flex-col font-sans pb-16 lg:pb-0 relative`}>
       
       {/* Global Header Bar */}
       <Header
@@ -104,6 +111,8 @@ export function App() {
         onOpenSettings={() => setActiveTab('settings')}
         unreadAlertCount={unreadAlertCount}
         activeTab={activeTab}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
         setActiveTab={(tab) => {
           if (tab !== 'event_details') setSelectedEvent(null);
           setActiveTab(tab);
@@ -126,6 +135,7 @@ export function App() {
             onFindHelp={() => setActiveTab('resources')}
             onReportIncident={() => setActiveTab('report')}
             onOpenSavedLocations={() => setActiveTab('saved_locations')}
+            isDark={isDark}
           />
         )}
 
@@ -153,6 +163,7 @@ export function App() {
             nearbyResources={resources.filter(
               (r) => r.district.toLowerCase() === selectedEvent.district.toLowerCase() || r.state.toLowerCase() === selectedEvent.state.toLowerCase()
             )}
+            isDark={isDark}
           />
         )}
 
@@ -162,6 +173,7 @@ export function App() {
             currentLocation={currentLocation}
             onSubmitReport={handleSubmitNewReport}
             onCancel={() => setActiveTab('dashboard')}
+            isDark={isDark}
           />
         )}
 
@@ -172,6 +184,7 @@ export function App() {
             currentLocation={currentLocation}
             onSelectResource={(res) => setSelectedResource(res)}
             onSwitchToMap={() => setActiveTab('map')}
+            isDark={isDark}
           />
         )}
 
@@ -181,6 +194,7 @@ export function App() {
             alerts={alerts}
             onSelectAlert={handleSelectAlert}
             onMarkAllAsRead={handleMarkAllAlertsRead}
+            isDark={isDark}
           />
         )}
 
@@ -191,14 +205,15 @@ export function App() {
             events={events}
             onSelectLocation={handleSelectLocation}
             onOpenSearch={() => setShowLocationSearch(true)}
+            isDark={isDark}
           />
         )}
 
         {/* S14 SETTINGS */}
-        {activeTab === 'settings' && <SettingsScreen />}
+        {activeTab === 'settings' && <SettingsScreen isDark={isDark} onToggleTheme={toggleTheme} />}
 
         {/* S15 ABOUT / DATA SOURCES */}
-        {activeTab === 'about' && <AboutSourcesScreen />}
+        {activeTab === 'about' && <AboutSourcesScreen isDark={isDark} />}
 
       </main>
 
@@ -211,6 +226,7 @@ export function App() {
         }}
         unreadAlertCount={unreadAlertCount}
         onOpenMore={() => setActiveTab('about')}
+        isDark={isDark}
       />
 
       {/* S01 ONBOARDING MODAL */}
@@ -221,6 +237,7 @@ export function App() {
           handleSelectLocation(INITIAL_LOCATIONS[0]);
           setShowOnboarding(false);
         }}
+        isDark={isDark}
       />
 
       {/* S03 LOCATION SEARCH MODAL */}
@@ -229,6 +246,7 @@ export function App() {
         onClose={() => setShowLocationSearch(false)}
         onSelectLocation={handleSelectLocation}
         currentLocation={currentLocation}
+        isDark={isDark}
       />
 
       {/* S08 REPORT SUBMITTED MODAL */}
@@ -236,6 +254,7 @@ export function App() {
         report={submittedReport}
         isOpen={showReportSubmitted}
         onClose={() => setShowReportSubmitted(false)}
+        isDark={isDark}
       />
 
       {/* S10 RESOURCE DETAIL MODAL */}
@@ -243,6 +262,7 @@ export function App() {
         resource={selectedResource}
         isOpen={!!selectedResource}
         onClose={() => setSelectedResource(null)}
+        isDark={isDark}
       />
 
       {/* S12 ALERT DETAIL MODAL */}
@@ -255,9 +275,18 @@ export function App() {
           if (evt) handleSelectEvent(evt);
         }}
         onFindHelp={() => setActiveTab('resources')}
+        isDark={isDark}
       />
 
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   );
 }
 
