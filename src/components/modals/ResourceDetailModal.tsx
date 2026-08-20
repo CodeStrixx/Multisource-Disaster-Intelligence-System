@@ -6,12 +6,14 @@ interface ResourceDetailModalProps {
   resource: ReliefResource | null;
   isOpen: boolean;
   onClose: () => void;
+  isDark?: boolean;
 }
 
 export const ResourceDetailModal: React.FC<ResourceDetailModalProps> = ({
   resource,
   isOpen,
-  onClose
+  onClose,
+  isDark = true,
 }) => {
   if (!isOpen || !resource) return null;
 
@@ -19,77 +21,88 @@ export const ResourceDetailModal: React.FC<ResourceDetailModalProps> = ({
     window.open(`https://www.google.com/maps/search/?api=1&query=${resource.lat},${resource.lng}`, '_blank');
   };
 
+  const card    = isDark ? 'bg-ops-container border-ops-divider' : 'bg-white border-day-divider';
+  const cardLow = isDark ? 'bg-ops-low border-ops-divider'       : 'bg-day-low border-day-divider';
+  const text    = isDark ? 'text-ops-text'  : 'text-day-text';
+  const muted   = isDark ? 'text-ops-muted' : 'text-day-muted';
+  const outline = isDark ? 'text-ops-outline' : 'text-day-outline';
+  const divider = isDark ? 'border-ops-divider' : 'border-day-divider';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-900/60 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-surface-border">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+      <div className={`${card} rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border`}>
+        
         {/* Header */}
-        <div className="bg-brand-900 text-white p-5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Building className="w-5 h-5 text-brand-100" />
+        <div className={`p-4 flex items-center justify-between border-b ${divider} ${isDark ? 'bg-ops-surface' : 'bg-day-container'}`}>
+          <div className="flex items-center gap-2.5">
+            <Building className="w-5 h-5 text-status-info" />
             <div>
-              <span className="text-[10px] uppercase font-bold text-brand-100/90">{resource.type.replace('_', ' ')} (S10)</span>
-              <h3 className="font-bold text-lg leading-tight">{resource.name}</h3>
+              <span className={`text-[10px] uppercase font-mono font-bold ${outline}`}>
+                // {resource.type.replace('_', ' ')} (S10)
+              </span>
+              <h3 className={`font-mono font-bold text-base leading-tight ${text}`}>{resource.name}</h3>
             </div>
           </div>
-          <button onClick={onClose} className="text-brand-100 hover:text-white p-1 rounded-md">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className={`p-1 rounded-md ${muted} hover:${text}`}>
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body Content */}
-        <div className="p-6 space-y-4 text-xs text-textMain-primary">
-          <div className="bg-surface-bg p-3.5 rounded-lg border border-surface-border space-y-2">
+        <div className="p-5 space-y-4 text-xs font-mono">
+          <div className={`${cardLow} p-3.5 rounded-lg border space-y-1.5`}>
             <div className="flex items-start gap-2">
-              <MapPin className="w-4 h-4 text-brand-700 shrink-0 mt-0.5" />
+              <MapPin className="w-4 h-4 text-status-info shrink-0 mt-0.5" />
               <div>
-                <strong className="text-brand-900 text-sm">Full Address:</strong>
-                <p className="text-textMain-secondary">{resource.address}</p>
+                <strong className={`block text-xs ${text}`}>ADDRESS:</strong>
+                <p className={`font-sans text-[11px] mt-0.5 ${muted}`}>{resource.address}</p>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
-              <span className="text-emerald-900 font-medium block text-[11px]">Operating Status</span>
-              <span className="text-sm font-extrabold text-emerald-800 uppercase">{resource.status}</span>
+            <div className={`p-3 rounded-lg border ${isDark ? 'bg-status-success-bg/20 border-status-success/40' : 'bg-emerald-50 border-emerald-200'}`}>
+              <span className={`font-mono block text-[10px] ${outline}`}>STATUS</span>
+              <span className="text-sm font-mono font-bold text-status-success uppercase">{resource.status}</span>
             </div>
 
             {resource.capacity && (
-              <div className="bg-brand-50 p-3 rounded-lg border border-brand-100">
-                <span className="text-brand-900 font-medium block text-[11px]">Capacity / Stock</span>
-                <span className="text-sm font-extrabold text-brand-700">{resource.capacity}</span>
+              <div className={`p-3 rounded-lg border ${isDark ? 'bg-status-info-bg/20 border-status-info/40' : 'bg-blue-50 border-blue-200'}`}>
+                <span className={`font-mono block text-[10px] ${outline}`}>CAPACITY / STOCK</span>
+                <span className="text-sm font-mono font-bold text-status-info">{resource.capacity}</span>
               </div>
             )}
           </div>
 
-          <div className="p-3 bg-surface-bg rounded-lg border border-surface-border space-y-1.5">
-            <div className="flex items-center justify-between text-textMain-secondary">
-              <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-brand-700" /> Data Source:</span>
-              <strong className="text-brand-900">{resource.source}</strong>
+          <div className={`p-3 ${cardLow} rounded-lg border space-y-1 text-[11px]`}>
+            <div className={`flex items-center justify-between ${muted}`}>
+              <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-status-info" /> SOURCE:</span>
+              <strong className={text}>{resource.source}</strong>
             </div>
-            <div className="flex items-center justify-between text-textMain-secondary">
-              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-brand-700" /> Last Updated:</span>
-              <strong className="text-brand-900">{resource.updatedAt}</strong>
+            <div className={`flex items-center justify-between ${muted}`}>
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-status-info" /> LAST SYNC:</span>
+              <strong className={text}>{resource.updatedAt}</strong>
             </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 bg-surface-bg border-t border-surface-border flex flex-col sm:flex-row gap-2 justify-end">
+        <div className={`p-4 border-t ${divider} flex flex-col sm:flex-row gap-2 justify-end ${isDark ? 'bg-ops-surface' : 'bg-day-low'}`}>
           <a
             href={`tel:${resource.phone}`}
-            className="w-full sm:w-auto px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-md shadow transition-colors flex items-center justify-center gap-1.5"
+            className="w-full sm:w-auto px-4 py-2 bg-status-success hover:bg-emerald-600 text-white font-mono font-bold text-xs tracking-wider rounded-md shadow transition-colors flex items-center justify-center gap-1.5"
           >
-            <Phone className="w-4 h-4" /> Call {resource.phone}
+            <Phone className="w-3.5 h-3.5" /> CALL {resource.phone}
           </a>
 
           <button
             onClick={handleDirections}
-            className="w-full sm:w-auto px-5 py-2.5 bg-brand-700 hover:bg-brand-900 text-white font-bold text-xs rounded-md shadow transition-colors flex items-center justify-center gap-1.5"
+            className="w-full sm:w-auto px-4 py-2 bg-status-info hover:bg-blue-500 text-white font-mono font-bold text-xs tracking-wider rounded-md shadow transition-colors flex items-center justify-center gap-1.5"
           >
-            <Navigation className="w-4 h-4" /> Get Directions
+            <Navigation className="w-3.5 h-3.5" /> DIRECTIONS
           </button>
         </div>
+
       </div>
     </div>
   );
