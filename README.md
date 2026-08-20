@@ -41,7 +41,7 @@
 
 **Ikjot Singh** (Frontend)
 - [Profile](https://github.com/RottenCheesy "Ikjot_Singh")
-- [Email]
+- [Email](mailto:ikjot.manraj@gmail.com?subject=Hi "Hi!")
 
 ## Collaborators
 
