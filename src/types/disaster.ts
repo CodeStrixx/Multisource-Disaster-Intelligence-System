@@ -4,7 +4,7 @@ export type DisasterType = 'flood' | 'heavy_rain' | 'cyclone' | 'landslide' | 'e
 
 export type VerificationStatus = 'UNVERIFIED' | 'UNDER_REVIEW' | 'CORROBORATED' | 'VERIFIED' | 'REJECTED';
 
-export type SourceType = 'official' | 'trusted' | 'corroborated' | 'public' | 'unverified';
+export type SourceType = 'official' | 'trusted' | 'corroborated' | 'public' | 'unverified' | 'regional_media' | 'news_wire';
 
 export type ResourceType = 'shelter' | 'hospital' | 'relief_centre' | 'police' | 'fire_station';
 
@@ -23,6 +23,22 @@ export interface DataSource {
   reliabilityScore: number; // 0-100
   lastSync: string;
   status: 'active' | 'delayed' | 'stale';
+  channelLogo?: string;
+  regionalLanguage?: string;
+  bureauLocation?: string;
+}
+
+export interface NewsDispatch {
+  id: string;
+  channelName: string;
+  headline: string;
+  summary: string;
+  timestamp: string;
+  language: string;
+  correspondent: string;
+  verificationWeight: number; // +% score contribution
+  isLiveBroadcast?: boolean;
+  videoClipUrl?: string;
 }
 
 export interface VerificationFactor {
@@ -49,6 +65,7 @@ export interface DisasterEvent {
   startedAt: string;
   updatedAt: string;
   sources: DataSource[];
+  newsDispatches?: NewsDispatch[];
   verificationStatus: VerificationStatus;
   verificationFactors: VerificationFactor[];
   whatWeKnow: string[];
