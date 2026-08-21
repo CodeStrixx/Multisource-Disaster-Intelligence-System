@@ -5,7 +5,7 @@
 
 ## Links
 
-- [Website](https://multisource-disaster-management-sys.vercel.app/ "Live View")
+- [Website](https://msdis.vercel.app/ "Live View")
 
 ## Built With
 
