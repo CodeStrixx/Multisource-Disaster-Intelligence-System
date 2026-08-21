@@ -40,8 +40,7 @@ export const GISMap: React.FC<GISMapProps> = ({
   isFullScreen = false,
   onToggleFullScreen
   isDark = true,
-  isDark
-}: GISMapProps) => {
+}) => {
   // Layer visibility state
   const [showHazards, setShowHazards] = useState(true);
   const [showReports, setShowReports] = useState(true);
