@@ -25,6 +25,7 @@ interface GISMapProps {
   onSelectResource?: (resource: ReliefResource) => void;
   isFullScreen?: boolean;
   onToggleFullScreen?: () => void;
+  isDark?: boolean;
 }
 
 export const GISMap: React.FC<GISMapProps> = ({
