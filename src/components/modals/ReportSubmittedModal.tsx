@@ -1,75 +1,86 @@
 import React from 'react';
 import { IncidentReport } from '../../types/disaster';
 import { VerificationBadge } from '../common/TrustBadges';
-import { CheckCircle2, Shield, ArrowRight, Copy, Share2 } from 'lucide-react';
+import { CheckCircle2, Shield, ArrowRight } from 'lucide-react';
 
 interface ReportSubmittedModalProps {
   report: IncidentReport | null;
   isOpen: boolean;
   onClose: () => void;
+  isDark?: boolean;
 }
 
 export const ReportSubmittedModal: React.FC<ReportSubmittedModalProps> = ({
   report,
   isOpen,
-  onClose
+  onClose,
+  isDark = true,
 }) => {
   if (!isOpen || !report) return null;
 
+  const card    = isDark ? 'bg-ops-container border-ops-divider' : 'bg-white border-day-divider';
+  const cardLow = isDark ? 'bg-ops-low border-ops-divider'       : 'bg-day-low border-day-divider';
+  const text    = isDark ? 'text-ops-text'  : 'text-day-text';
+  const muted   = isDark ? 'text-ops-muted' : 'text-day-muted';
+  const outline = isDark ? 'text-ops-outline' : 'text-day-outline';
+  const divider = isDark ? 'border-ops-divider' : 'border-day-divider';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-900/70 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-surface-border text-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+      <div className={`${card} rounded-xl shadow-2xl max-w-md w-full overflow-hidden border text-center`}>
         
         {/* Banner Header */}
-        <div className="bg-emerald-700 text-white p-6 space-y-2">
-          <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mx-auto text-white shadow-inner">
-            <CheckCircle2 className="w-9 h-9 text-white" />
+        <div className="bg-status-success-bg/30 border-b border-status-success/40 p-5 space-y-1.5">
+          <div className="w-12 h-12 rounded-full bg-status-success-bg/40 border border-status-success/50 flex items-center justify-center mx-auto text-status-success shadow-inner">
+            <CheckCircle2 className="w-7 h-7" />
           </div>
-          <h3 className="text-xl font-extrabold">Report Submitted Successfully</h3>
-          <p className="text-xs text-emerald-100">Thank you for contributing to public safety intelligence.</p>
+          <h3 className={`text-base font-mono font-bold tracking-tight text-status-success`}>
+            // REPORT QUEUED IN OPS PIPELINE
+          </h3>
+          <p className={`text-[11px] font-mono ${muted}`}>Intelligence signal submitted successfully.</p>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 space-y-4 text-xs text-textMain-primary">
-          <div className="bg-surface-bg p-3.5 rounded-lg border border-surface-border space-y-2 text-left">
+        <div className="p-5 space-y-3.5 text-xs text-left font-mono">
+          <div className={`${cardLow} p-3.5 rounded-lg border space-y-2`}>
             <div className="flex items-center justify-between">
-              <span className="text-textMain-muted">Report Reference ID:</span>
-              <span className="font-mono font-bold text-brand-900 bg-brand-100 px-2 py-0.5 rounded">{report.id}</span>
+              <span className={outline}>REPORT ID:</span>
+              <span className="font-bold text-status-info bg-status-info-bg/30 px-2 py-0.5 rounded border border-status-info/40">{report.id}</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-textMain-muted">Verification Status:</span>
+              <span className={outline}>STATUS:</span>
               <VerificationBadge status={report.verificationStatus} />
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-textMain-muted">Location:</span>
-              <span className="font-semibold text-brand-900 truncate max-w-[200px]">{report.locationName}</span>
+              <span className={outline}>LOCATION:</span>
+              <span className={`font-semibold truncate max-w-[180px] ${text}`}>{report.locationName.toUpperCase()}</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-textMain-muted">Disaster Hazard:</span>
-              <span className="font-semibold capitalize text-brand-700">{report.type}</span>
+              <span className={outline}>HAZARD TYPE:</span>
+              <span className="font-semibold uppercase text-status-warning">{report.type}</span>
             </div>
           </div>
 
-          <div className="p-3 bg-brand-50 rounded-lg border border-brand-100 text-left space-y-1 text-brand-900">
-            <div className="font-bold flex items-center gap-1.5 text-xs">
-              <Shield className="w-3.5 h-3.5 text-brand-700" /> What Happens Next?
+          <div className={`p-3 rounded-lg border space-y-1 ${isDark ? 'bg-ops-high border-ops-divider text-ops-muted' : 'bg-day-container border-day-divider text-day-muted'}`}>
+            <div className={`font-bold flex items-center gap-1.5 text-xs ${text}`}>
+              <Shield className="w-3.5 h-3.5 text-status-info" /> // NEXT ACTIONS
             </div>
-            <p className="text-[11px] text-brand-900/80 leading-relaxed">
-              Your report has been queued in the automated verification pipeline. If other citizens or official sensors corroborate this signal within 2 km, the risk badge will elevate automatically.
+            <p className="text-[11px] font-sans leading-relaxed">
+              Your signal is now undergoing automated spatial corroboration. If other field reports or sensors verify within 2km, the threat status will elevate across the ops-center.
             </p>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 bg-surface-bg border-t border-surface-border flex gap-2 justify-center">
+        <div className={`p-4 border-t ${divider} flex justify-center ${isDark ? 'bg-ops-surface' : 'bg-day-low'}`}>
           <button
             onClick={onClose}
-            className="w-full py-2.5 bg-brand-700 hover:bg-brand-900 text-white font-bold text-xs rounded-md shadow transition-colors flex items-center justify-center gap-1.5"
+            className="w-full py-2.5 bg-status-info hover:bg-blue-500 text-white font-mono font-bold text-xs tracking-wider rounded-md shadow transition-colors flex items-center justify-center gap-1.5"
           >
-            Return to Dashboard <ArrowRight className="w-3.5 h-3.5" />
+            RETURN TO OPS-CENTER <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 

@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { ReliefResource, ResourceType, LocationCoordinates } from '../../types/disaster';
-import { LifeBuoy, MapPin, Phone, Filter, Search, Map, List, Building, ShieldCheck, ExternalLink } from 'lucide-react';
+import { LifeBuoy, MapPin, Phone, Search, Map, List, ExternalLink, ShieldCheck } from 'lucide-react';
 
 interface NearbyResourcesScreenProps {
   resources: ReliefResource[];
   currentLocation: LocationCoordinates;
   onSelectResource: (resource: ReliefResource) => void;
   onSwitchToMap: () => void;
+  isDark?: boolean;
 }
 
 export const NearbyResourcesScreen: React.FC<NearbyResourcesScreenProps> = ({
   resources,
   currentLocation,
   onSelectResource,
-  onSwitchToMap
+  onSwitchToMap,
+  isDark = true,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<ResourceType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,38 +30,58 @@ export const NearbyResourcesScreen: React.FC<NearbyResourcesScreenProps> = ({
   });
 
   const categories: { id: ResourceType | 'all'; label: string; icon: string }[] = [
-    { id: 'all', label: 'All Resources', icon: '📍' },
-    { id: 'shelter', label: 'Shelters', icon: '⛺' },
-    { id: 'hospital', label: 'Hospitals & Medical', icon: '🏥' },
-    { id: 'relief_centre', label: 'Relief Outposts', icon: '📦' },
-    { id: 'police', label: 'Police Help', icon: '👮' },
-    { id: 'fire_station', label: 'Fire & Rescue', icon: '🚒' }
+    { id: 'all', label: 'ALL RESOURCES', icon: '📍' },
+    { id: 'shelter', label: 'SHELTERS', icon: '⛺' },
+    { id: 'hospital', label: 'HOSPITALS & MEDICAL', icon: '🏥' },
+    { id: 'relief_centre', label: 'RELIEF OUTPOSTS', icon: '📦' },
+    { id: 'police', label: 'POLICE', icon: '👮' },
+    { id: 'fire_station', label: 'FIRE & RESCUE', icon: '🚒' }
   ];
 
+  const card    = isDark ? 'bg-ops-container border-ops-divider' : 'bg-white border-day-divider';
+  const cardLow = isDark ? 'bg-ops-low border-ops-divider'       : 'bg-day-low border-day-divider';
+  const text    = isDark ? 'text-ops-text'  : 'text-day-text';
+  const muted   = isDark ? 'text-ops-muted' : 'text-day-muted';
+  const outline = isDark ? 'text-ops-outline' : 'text-day-outline';
+  const divider = isDark ? 'border-ops-divider' : 'border-day-divider';
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 animate-fadeIn">
+    <div className="max-w-6xl mx-auto px-4 py-6 space-y-5 animate-fadeIn">
+      
       {/* Header Banner */}
-      <div className="bg-brand-900 text-white rounded-xl p-6 shadow-md flex flex-wrap items-center justify-between gap-4">
+      <div className={`${card} rounded-xl p-5 border flex flex-wrap items-center justify-between gap-4`}>
         <div>
-          <div className="flex items-center gap-2 text-brand-100 text-xs font-semibold uppercase tracking-wider mb-1">
-            <LifeBuoy className="w-4 h-4 text-brand-100" /> Emergency Services Directory (S09)
+          <div className={`flex items-center gap-2 text-[10px] font-mono font-bold tracking-widest uppercase ${outline} mb-1`}>
+            <LifeBuoy className="w-3.5 h-3.5 text-status-info" /> // EMERGENCY LOGISTICS &amp; RELIEF DIRECTORY (S09)
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold">Relief & Assistance Near {currentLocation.name}</h2>
-          <p className="text-xs text-brand-100/80 mt-0.5">Verified shelters, trauma centers, and disaster relief posts in {currentLocation.state}.</p>
+          <h2 className={`text-xl font-bold font-mono tracking-tight ${text}`}>
+            RELIEF &amp; ASSISTANCE NEAR {currentLocation.name.toUpperCase()}
+          </h2>
+          <p className={`text-[11px] font-mono ${muted} mt-0.5`}>
+            Verified emergency shelters, trauma centers, and supply depots in {currentLocation.state.toUpperCase()}.
+          </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-brand-700/80 p-1 rounded-lg border border-brand-500/40">
+        <div className={`flex items-center gap-1.5 p-1 rounded-lg border ${divider} ${isDark ? 'bg-ops-high' : 'bg-day-low'}`}>
           <button
             onClick={() => setViewMode('list')}
-            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 ${viewMode === 'list' ? 'bg-white text-brand-900 shadow-sm' : 'text-brand-100 hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-md font-mono text-[10px] font-bold tracking-wider transition-colors flex items-center gap-1.5 ${
+              viewMode === 'list'
+                ? isDark ? 'bg-ops-container text-ops-text border border-ops-divider shadow-sm' : 'bg-white text-day-text border border-day-divider shadow-sm'
+                : `${muted} hover:${text}`
+            }`}
           >
-            <List className="w-3.5 h-3.5" /> List View
+            <List className="w-3 h-3" /> LIST VIEW
           </button>
           <button
             onClick={onSwitchToMap}
-            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 ${viewMode === 'map' ? 'bg-white text-brand-900 shadow-sm' : 'text-brand-100 hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-md font-mono text-[10px] font-bold tracking-wider transition-colors flex items-center gap-1.5 ${
+              viewMode === 'map'
+                ? isDark ? 'bg-ops-container text-ops-text border border-ops-divider shadow-sm' : 'bg-white text-day-text border border-day-divider shadow-sm'
+                : `${muted} hover:${text}`
+            }`}
           >
-            <Map className="w-3.5 h-3.5" /> Map View
+            <Map className="w-3 h-3" /> GIS MAP VIEW
           </button>
         </div>
       </div>
@@ -72,10 +94,10 @@ export const NearbyResourcesScreen: React.FC<NearbyResourcesScreenProps> = ({
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3.5 py-1.5 rounded-pill text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 border ${
+              className={`px-3 py-1.5 rounded-md font-mono text-[10px] font-bold tracking-wider whitespace-nowrap transition-all flex items-center gap-1.5 border ${
                 selectedCategory === cat.id
-                  ? 'bg-brand-700 text-white border-brand-700 shadow-sm'
-                  : 'bg-white text-textMain-primary border-surface-border hover:bg-brand-50'
+                  ? 'bg-status-info text-white border-status-info shadow-sm'
+                  : `${cardLow} ${muted} hover:${text} hover:border-status-info/40`
               }`}
             >
               <span>{cat.icon}</span>
@@ -86,13 +108,15 @@ export const NearbyResourcesScreen: React.FC<NearbyResourcesScreenProps> = ({
 
         {/* Search Input */}
         <div className="relative">
-          <Search className="w-4 h-4 text-textMain-muted absolute left-3.5 top-3" />
+          <Search className={`w-3.5 h-3.5 ${outline} absolute left-3.5 top-3`} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Filter by facility name, landmark, or street..."
-            className="w-full pl-10 pr-4 py-2 bg-white border border-surface-border rounded-lg text-sm text-textMain-primary focus:ring-2 focus:ring-brand-500 focus:outline-none shadow-sm"
+            placeholder="Search facility name, address, landmark..."
+            className={`w-full pl-9 pr-4 py-2 rounded-lg font-mono text-xs border focus:outline-none focus:ring-1 focus:ring-status-info shadow-sm ${
+              isDark ? 'bg-ops-container border-ops-divider text-ops-text placeholder:text-ops-outline' : 'bg-white border-day-divider text-day-text placeholder:text-day-outline'
+            }`}
           />
         </div>
       </div>
@@ -103,33 +127,39 @@ export const NearbyResourcesScreen: React.FC<NearbyResourcesScreenProps> = ({
           <div
             key={res.id}
             onClick={() => onSelectResource(res)}
-            className="bg-white rounded-xl p-5 border border-surface-border shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
+            className={`${card} rounded-xl p-4 border shadow-sm hover:border-status-info/60 transition-all cursor-pointer flex flex-col justify-between space-y-3 group`}
           >
             <div>
-              <div className="flex items-center justify-between gap-2 mb-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-100">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className={`text-[9px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${
+                  isDark ? 'bg-ops-high text-status-info border-status-info/30' : 'bg-blue-50 text-blue-800 border-blue-200'
+                }`}>
                   {res.type.replace('_', ' ')}
                 </span>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <span className="text-[10px] font-mono font-bold text-status-success bg-status-success-bg/20 px-2 py-0.5 rounded border border-status-success/30">
                   {res.status.toUpperCase()}
                 </span>
               </div>
 
-              <h3 className="font-bold text-base text-brand-900 group-hover:text-brand-700 transition-colors leading-snug">
-                {res.name}
+              <h3 className={`font-mono font-bold text-sm group-hover:text-status-info transition-colors leading-snug ${text}`}>
+                {res.name.toUpperCase()}
               </h3>
 
-              <div className="flex items-start gap-1.5 text-xs text-textMain-secondary mt-1.5">
-                <MapPin className="w-3.5 h-3.5 text-brand-700 shrink-0 mt-0.5" />
-                <span>{res.address}</span>
+              {/* Address with high contrast */}
+              <div className={`flex items-start gap-1.5 text-xs font-sans mt-2 ${muted}`}>
+                <MapPin className="w-3.5 h-3.5 text-status-info shrink-0 mt-0.5" />
+                <span className="leading-relaxed font-medium">{res.address}</span>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-surface-border space-y-2">
+            <div className={`pt-3 border-t ${divider} space-y-2.5`}>
               {res.capacity && (
-                <div className="text-xs text-brand-900 font-medium bg-surface-bg p-2 rounded">
-                  Capacity: <strong>{res.capacity}</strong>
-                  {res.availableBedsOrKits && <span className="text-emerald-700 font-bold ml-2">({res.availableBedsOrKits} Available)</span>}
+                <div className={`text-xs font-mono p-2 rounded border ${cardLow}`}>
+                  <span className={muted}>CAPACITY: </span>
+                  <strong className={text}>{res.capacity}</strong>
+                  {res.availableBedsOrKits && (
+                    <span className="text-status-success font-bold ml-2 font-mono">({res.availableBedsOrKits} AVAIL)</span>
+                  )}
                 </div>
               )}
 
@@ -137,13 +167,13 @@ export const NearbyResourcesScreen: React.FC<NearbyResourcesScreenProps> = ({
                 <a
                   href={`tel:${res.phone}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-brand-700 hover:bg-brand-900 text-white font-semibold px-3 py-1.5 rounded text-xs flex items-center gap-1 transition-colors"
+                  className="bg-status-success hover:bg-emerald-600 text-white font-mono font-bold px-3 py-1.5 rounded text-[11px] tracking-wider flex items-center gap-1.5 transition-colors shadow-sm"
                 >
-                  <Phone className="w-3.5 h-3.5" /> Call {res.phone}
+                  <Phone className="w-3 h-3" /> CALL {res.phone}
                 </a>
 
-                <span className="text-brand-700 font-semibold text-xs flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                  Details <ExternalLink className="w-3.5 h-3.5" />
+                <span className="text-status-info font-mono font-bold text-[10px] tracking-wider flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                  INTEL DOSSIER <ExternalLink className="w-3 h-3" />
                 </span>
               </div>
             </div>
@@ -153,17 +183,17 @@ export const NearbyResourcesScreen: React.FC<NearbyResourcesScreenProps> = ({
 
       {/* Empty State */}
       {filteredResources.length === 0 && (
-        <div className="bg-white rounded-xl p-8 border border-surface-border text-center space-y-3">
-          <LifeBuoy className="w-12 h-12 text-textMain-muted mx-auto" />
-          <h4 className="font-bold text-base text-brand-900">No resources found matching filter criteria</h4>
-          <p className="text-xs text-textMain-secondary max-w-sm mx-auto">
-            Try resetting search filters or expanding your search radius to adjacent districts.
+        <div className={`${card} rounded-xl p-8 border text-center space-y-3`}>
+          <LifeBuoy className={`w-10 h-10 ${outline} mx-auto`} />
+          <h4 className={`font-mono font-bold text-sm ${text}`}>// NO MATCHING RELIEF RESOURCES FOUND</h4>
+          <p className={`text-xs font-mono ${muted} max-w-sm mx-auto`}>
+            Try clearing filters or expanding search terms to adjacent district hubs.
           </p>
           <button
             onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
-            className="px-4 py-2 bg-brand-100 text-brand-900 font-semibold text-xs rounded-md hover:bg-brand-500 hover:text-white transition-colors"
+            className="px-4 py-2 bg-status-info text-white font-mono font-bold text-xs tracking-wider rounded-md hover:bg-blue-500 transition-colors"
           >
-            Reset Filters
+            RESET FILTERS
           </button>
         </div>
       )}

@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { SlidersHorizontal, MapPin, Bell, Globe, Shield, Eye, Save } from 'lucide-react';
+import { SlidersHorizontal, MapPin, Bell, Globe, Sun, Moon, Save, CheckCircle2 } from 'lucide-react';
 
-export const SettingsScreen: React.FC = () => {
+interface SettingsScreenProps {
+  isDark?: boolean;
+  onToggleTheme?: () => void;
+}
+
+export const SettingsScreen: React.FC<SettingsScreenProps> = ({ isDark = true, onToggleTheme }) => {
   const [locationPermission, setLocationPermission] = useState(true);
   const [highRiskAlerts, setHighRiskAlerts] = useState(true);
   const [moderateAlerts, setModerateAlerts] = useState(true);
@@ -13,80 +18,116 @@ export const SettingsScreen: React.FC = () => {
     setTimeout(() => setSavedSuccess(false), 2000);
   };
 
+  const card     = isDark ? 'bg-ops-container border-ops-divider' : 'bg-white border-day-divider';
+  const cardLow  = isDark ? 'bg-ops-low border-ops-divider'       : 'bg-day-low border-day-divider';
+  const text     = isDark ? 'text-ops-text'    : 'text-day-text';
+  const muted    = isDark ? 'text-ops-muted'   : 'text-day-muted';
+  const outline  = isDark ? 'text-ops-outline' : 'text-day-outline';
+  const divider  = isDark ? 'border-ops-divider' : 'border-day-divider';
+  const inputCls = isDark
+    ? 'w-full p-2.5 bg-ops-low border border-ops-divider rounded-md text-xs font-mono text-ops-text focus:ring-1 focus:ring-status-info focus:outline-none'
+    : 'w-full p-2.5 bg-day-low border border-day-divider rounded-md text-xs font-mono text-day-text focus:ring-1 focus:ring-blue-500 focus:outline-none';
+
+  const SettingRow = ({ label, desc, checked, onChange }: { label: string; desc: string; checked: boolean; onChange: (v: boolean) => void }) => (
+    <label className={`flex items-center justify-between p-3 ${cardLow} rounded-lg border cursor-pointer`}>
+      <div>
+        <div className={`font-mono font-bold text-xs tracking-wider ${text}`}>{label}</div>
+        <div className={`text-[11px] font-sans mt-0.5 ${muted}`}>{desc}</div>
+      </div>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="w-4 h-4 rounded"
+        style={{ accentColor: isDark ? '#3b82f6' : '#2563eb' }}
+      />
+    </label>
+  );
+
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 space-y-6 animate-fadeIn">
-      <div className="bg-brand-900 text-white rounded-xl p-6 shadow-md">
-        <div className="flex items-center gap-2 text-brand-100 text-xs font-semibold uppercase tracking-wider mb-1">
-          <SlidersHorizontal className="w-4 h-4 text-brand-100" /> Preferences & System Controls (S14)
+    <div className="max-w-3xl mx-auto px-4 py-6 space-y-5 animate-fadeIn">
+      
+      {/* Page Header */}
+      <div className={`${card} rounded-xl p-5 border`}>
+        <div className={`flex items-center gap-2 text-[10px] font-mono font-bold tracking-widest uppercase ${outline} mb-1`}>
+          <SlidersHorizontal className="w-3.5 h-3.5 text-status-info" /> // PREFERENCES &amp; SYSTEM CONTROLS
         </div>
-        <h2 className="text-xl sm:text-2xl font-extrabold">System Settings</h2>
-        <p className="text-xs text-brand-100/80 mt-0.5">Customize location permissions, alert thresholds, and language preferences.</p>
+        <h2 className={`text-xl font-bold font-mono tracking-tight ${text}`}>SYSTEM SETTINGS</h2>
+        <p className={`text-[11px] font-mono ${muted} mt-0.5`}>Customize location permissions, alert thresholds, and interface preferences.</p>
       </div>
 
-      <div className="bg-white rounded-xl p-6 border border-surface-border shadow-sm space-y-6 text-sm text-textMain-primary">
-        
-        {/* Location & GPS Settings */}
-        <div className="space-y-3 border-b pb-5">
-          <h3 className="font-bold text-brand-900 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-brand-700" /> Location & Geofencing
+      {/* Settings Panels */}
+      <div className={`${card} rounded-xl p-5 border space-y-6`}>
+
+        {/* ── Theme Toggle ── */}
+        <div className={`space-y-3 pb-5 border-b ${divider}`}>
+          <h3 className={`font-mono font-bold text-xs tracking-widest uppercase flex items-center gap-2 ${text}`}>
+            {isDark ? <Moon className="w-4 h-4 text-status-info" /> : <Sun className="w-4 h-4 text-amber-500" />}
+            Interface Theme
           </h3>
-          <div className="flex items-center justify-between p-3 bg-surface-bg rounded-lg border">
+          <div className={`flex items-center justify-between p-3 ${cardLow} rounded-lg border`}>
             <div>
-              <div className="font-semibold text-xs text-brand-900">Automatic Location Detection</div>
-              <div className="text-[11px] text-textMain-secondary">Use browser GPS to detect local disaster risks automatically.</div>
+              <div className={`font-mono font-bold text-xs tracking-wider ${text}`}>
+                {isDark ? 'DARK MODE — Tactical Ops-Center' : 'LIGHT MODE — Clean Professional'}
+              </div>
+              <div className={`text-[11px] font-sans mt-0.5 ${muted}`}>
+                {isDark ? 'Deep navy background with monospaced tactical design.' : 'Light blue-tinted clean interface for daytime use.'}
+              </div>
             </div>
-            <input
-              type="checkbox"
-              checked={locationPermission}
-              onChange={(e) => setLocationPermission(e.target.checked)}
-              className="w-4 h-4 text-brand-700 rounded focus:ring-brand-500"
-            />
+            <button
+              onClick={onToggleTheme}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-md font-mono font-bold text-[10px] tracking-widest border transition-all ${
+                isDark
+                  ? 'bg-ops-high border-ops-divider text-ops-muted hover:text-status-info hover:border-status-info/50'
+                  : 'bg-day-container border-day-divider text-day-muted hover:text-blue-600 hover:border-blue-400'
+              }`}
+            >
+              {isDark ? <><Sun className="w-3.5 h-3.5" /> SWITCH TO LIGHT</> : <><Moon className="w-3.5 h-3.5" /> SWITCH TO DARK</>}
+            </button>
           </div>
         </div>
 
-        {/* Notifications & Alert Thresholds */}
-        <div className="space-y-3 border-b pb-5">
-          <h3 className="font-bold text-brand-900 flex items-center gap-2">
-            <Bell className="w-4 h-4 text-brand-700" /> Push Notifications & Thresholds
+        {/* ── Location ── */}
+        <div className={`space-y-3 pb-5 border-b ${divider}`}>
+          <h3 className={`font-mono font-bold text-xs tracking-widest uppercase flex items-center gap-2 ${text}`}>
+            <MapPin className="w-4 h-4 text-status-info" /> Location &amp; Geofencing
           </h3>
-          <div className="space-y-2">
-            <label className="flex items-center justify-between p-3 bg-surface-bg rounded-lg border cursor-pointer">
-              <div>
-                <div className="font-semibold text-xs text-brand-900">Critical & High Risk Broadcast Alerts</div>
-                <div className="text-[11px] text-textMain-secondary">Immediate sound notifications for severe rainfall, floods, and landslides.</div>
-              </div>
-              <input
-                type="checkbox"
-                checked={highRiskAlerts}
-                onChange={(e) => setHighRiskAlerts(e.target.checked)}
-                className="w-4 h-4 text-brand-700 rounded focus:ring-brand-500"
-              />
-            </label>
-
-            <label className="flex items-center justify-between p-3 bg-surface-bg rounded-lg border cursor-pointer">
-              <div>
-                <div className="font-semibold text-xs text-brand-900">Moderate Advisory Alerts</div>
-                <div className="text-[11px] text-textMain-secondary">Receive daily weather summaries and high tide advisories.</div>
-              </div>
-              <input
-                type="checkbox"
-                checked={moderateAlerts}
-                onChange={(e) => setModerateAlerts(e.target.checked)}
-                className="w-4 h-4 text-brand-700 rounded focus:ring-brand-500"
-              />
-            </label>
-          </div>
+          <SettingRow
+            label="AUTOMATIC LOCATION DETECTION"
+            desc="Use browser GPS to detect local disaster risks automatically."
+            checked={locationPermission}
+            onChange={setLocationPermission}
+          />
         </div>
 
-        {/* Language Selection */}
-        <div className="space-y-3 border-b pb-5">
-          <h3 className="font-bold text-brand-900 flex items-center gap-2">
-            <Globe className="w-4 h-4 text-brand-700" /> Language & Regional Localization
+        {/* ── Notifications ── */}
+        <div className={`space-y-3 pb-5 border-b ${divider}`}>
+          <h3 className={`font-mono font-bold text-xs tracking-widest uppercase flex items-center gap-2 ${text}`}>
+            <Bell className="w-4 h-4 text-status-critical" /> Broadcast Alert Thresholds
+          </h3>
+          <SettingRow
+            label="CRITICAL &amp; HIGH RISK ALERTS"
+            desc="Immediate notifications for severe rainfall, floods, and landslides."
+            checked={highRiskAlerts}
+            onChange={setHighRiskAlerts}
+          />
+          <SettingRow
+            label="MODERATE ADVISORY ALERTS"
+            desc="Daily weather summaries and high tide advisories."
+            checked={moderateAlerts}
+            onChange={setModerateAlerts}
+          />
+        </div>
+
+        {/* ── Language ── */}
+        <div className={`space-y-3 pb-5 border-b ${divider}`}>
+          <h3 className={`font-mono font-bold text-xs tracking-widest uppercase flex items-center gap-2 ${text}`}>
+            <Globe className="w-4 h-4 text-status-success" /> Language &amp; Regional Localization
           </h3>
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="w-full p-2.5 bg-surface-bg border border-surface-border rounded-md text-xs font-semibold text-brand-900 focus:ring-2 focus:ring-brand-500 focus:outline-none"
+            className={inputCls}
           >
             <option value="English">English (Default)</option>
             <option value="Hindi">Hindi (हिंदी)</option>
@@ -97,21 +138,20 @@ export const SettingsScreen: React.FC = () => {
           </select>
         </div>
 
-        {/* Action Button */}
-        <div className="flex items-center justify-between pt-2">
+        {/* ── Save ── */}
+        <div className="flex items-center justify-between pt-1">
           {savedSuccess ? (
-            <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded border border-emerald-200">
-              Preferences Saved Successfully!
+            <span className="text-[11px] font-mono font-bold text-status-success flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4" /> PREFERENCES SAVED
             </span>
           ) : (
-            <span className="text-xs text-textMain-muted">Changes take effect immediately.</span>
+            <span className={`text-[11px] font-mono ${outline}`}>Changes take effect immediately.</span>
           )}
-
           <button
             onClick={handleSave}
-            className="px-5 py-2.5 bg-brand-700 hover:bg-brand-900 text-white font-bold text-xs rounded-md shadow transition-colors flex items-center gap-1.5"
+            className="px-5 py-2.5 bg-status-info hover:bg-blue-500 text-white font-mono font-bold text-[10px] tracking-widest rounded-md shadow transition-colors flex items-center gap-1.5"
           >
-            <Save className="w-4 h-4" /> Save Preferences
+            <Save className="w-3.5 h-3.5" /> SAVE PREFERENCES
           </button>
         </div>
 
