@@ -19,9 +19,8 @@
 
 ## Future Updates
 
-- [ ] Verification of Citizen Report
+- [ ] Integrated AI Assistance
 - [ ] Regional Language Support
-- [ ] Post-Disaster Data Update
 
 ## Authors
 
