@@ -1,4 +1,3 @@
-# SIH 2026
 <h1 align="center">Multisource Disaster Intelligence System</h1>
 
 <p align="center">This software streamlines the process of gathering and categorizing disaster related data from various sources, significantly reducing the time required for response efforts by providing real-time insights and actionable information, the software will enhance the effectiveness of disaster response operations, ultimately saving lives.</p>
