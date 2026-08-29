@@ -71,6 +71,25 @@ ENV/
 .installed.cfg
 *.egg
 
+# Backend runtime artifacts (DB + server/dev-server logs)
+backend/disaster.db
+disaster.db
+*.db-journal
+*.db-wal
+*.db-shm
+backend/uvicorn.log
+backend/uvicorn.err
+backend/vite.log
+backend/vite.err
+*.err
+
+# Python tooling caches
+.ruff_cache/
+.mypy_cache/
+.pytype/
+.coverage
+htmlcov/
+
 # Deployment & cloud
 .vercel
 .netlify

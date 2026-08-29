@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { DisasterEvent, IncidentReport, ReliefResource, LocationCoordinates } from '../../types/disaster';
+import { REPORT_VERIFY_UPVOTES, WeatherSnapshot } from '../../services/api';
 import { RiskBadge, VerificationBadge, FreshnessIndicator } from '../common/TrustBadges';
 import { GISMap } from '../map/GISMap';
 import {
   MapPin, Eye, AlertTriangle, RefreshCw, Layers, PlusCircle,
-  Bookmark, Activity, ShieldAlert, Users, ChevronRight, Radio
+  Bookmark, Activity, ShieldAlert, Users, ChevronRight, Radio,
+  Cloud, CloudRain, CloudLightning, CloudFog, CloudSun, Sun, Snowflake,
+  Thermometer, Droplets, Wind, Satellite
 } from 'lucide-react';
 
 interface DashboardScreenProps {
@@ -21,7 +24,29 @@ interface DashboardScreenProps {
   isDark?: boolean;
   isLoading?: boolean;
   isOffline?: boolean;
+  weather?: WeatherSnapshot | null;
+  onUpvoteReport?: (reportId: string) => void;
 }
+
+// Map a weather condition string to a themed icon
+const getWeatherIcon = (condition: string | null | undefined) => {
+  const c = (condition || '').toLowerCase();
+  const cls = 'w-6 h-6 text-status-info';
+  if (c.includes('thunder')) return <CloudLightning className="w-6 h-6 text-status-warning" />;
+  if (c.includes('rain') || c.includes('drizzle') || c.includes('shower')) return <CloudRain className={cls} />;
+  if (c.includes('snow')) return <Snowflake className={cls} />;
+  if (c.includes('fog') || c.includes('mist') || c.includes('rime')) return <CloudFog className={cls} />;
+  if (c.includes('clear') || c.includes('sun')) return <Sun className="w-6 h-6 text-status-warning" />;
+  if (c.includes('overcast')) return <Cloud className={cls} />;
+  return <CloudSun className={cls} />;
+};
+
+const WARNING_META: Record<string, { label: string; cls: string }> = {
+  none:    { label: 'NO ADVISORY',       cls: 'text-status-success bg-status-success-bg/20 border-status-success/40' },
+  alert:   { label: 'ADVISORY ACTIVE',   cls: 'text-status-warning bg-status-warning-bg/20 border-status-warning/40' },
+  watch:   { label: 'OFFICIAL WATCH',    cls: 'text-status-warning bg-status-warning-bg/30 border-status-warning/60' },
+  warning: { label: 'OFFICIAL WARNING',  cls: 'text-status-critical bg-status-critical-bg/20 border-status-critical/50' },
+};
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   currentLocation,
@@ -37,6 +62,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   isDark = true,
   isLoading = false,
   isOffline = false,
+  weather,
+  onUpvoteReport,
 }) => {
   const locationEvents = events.filter(
     (e) =>
@@ -108,6 +135,90 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
           </button>
         </div>
       </div>
+
+      {/* ── Live Weather Telemetry ── */}
+      {weather && weather.observedAt ? (
+        <div className={`${card} rounded-xl p-4 border space-y-3`}>
+          <div className={`flex flex-wrap items-center justify-between gap-2 border-b ${divider} pb-2`}>
+            <div className={`text-[10px] font-mono tracking-widest uppercase flex items-center gap-1.5 ${outline}`}>
+              <Satellite className="w-3.5 h-3.5 text-status-info" /> // LIVE WEATHER FEED — {currentLocation.name.toUpperCase()}
+            </div>
+            <div className="flex items-center gap-2">
+              {weather.isStale && (
+                <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${isDark ? 'bg-status-warning-bg/20 border-status-warning/40 text-status-warning' : 'bg-amber-50 border-amber-300 text-amber-800'}`}>
+                  ⚠ STALE DATA
+                </span>
+              )}
+              <span className={`text-[10px] font-mono ${outline}`}>
+                OBS {weather.observedAt.slice(11, 16)} UTC · VIA {(weather.provider || 'BACKEND').replace('_', '-').toUpperCase()}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Condition tile */}
+            <div className={`${cardLow} rounded-lg p-3 border flex items-center gap-3`}>
+              {getWeatherIcon(weather.weatherCondition)}
+              <div className="min-w-0">
+                <div className={`text-[9px] font-mono tracking-widest uppercase ${outline}`}>CONDITION</div>
+                <div className={`font-mono font-bold text-xs truncate ${text}`} title={weather.weatherCondition || undefined}>
+                  {(weather.weatherCondition || 'UNKNOWN').toUpperCase()}
+                </div>
+              </div>
+            </div>
+
+            {/* Temperature tile */}
+            <div className={`${cardLow} rounded-lg p-3 border flex items-center gap-3`}>
+              <Thermometer className="w-6 h-6 text-status-critical" />
+              <div>
+                <div className={`text-[9px] font-mono tracking-widest uppercase ${outline}`}>TEMPERATURE</div>
+                <div className={`font-mono font-bold text-xs ${text}`}>
+                  {weather.temperature != null ? `${weather.temperature.toFixed(1)}°C` : '—'}
+                </div>
+              </div>
+            </div>
+
+            {/* Rainfall tile */}
+            <div className={`${cardLow} rounded-lg p-3 border flex items-center gap-3`}>
+              <Droplets className="w-6 h-6 text-status-info" />
+              <div>
+                <div className={`text-[9px] font-mono tracking-widest uppercase ${outline}`}>RAINFALL 24H</div>
+                <div className={`font-mono font-bold text-xs ${(weather.rainfallMm24h || 0) >= 64.5 ? 'text-status-warning' : text}`}>
+                  {weather.rainfallMm24h != null ? `${weather.rainfallMm24h.toFixed(1)} MM` : '—'}
+                </div>
+              </div>
+            </div>
+
+            {/* Wind + advisory tile */}
+            <div className={`${cardLow} rounded-lg p-3 border flex items-center gap-3`}>
+              <Wind className="w-6 h-6 text-status-success" />
+              <div className="min-w-0">
+                <div className={`text-[9px] font-mono tracking-widest uppercase ${outline}`}>WIND</div>
+                <div className={`font-mono font-bold text-xs ${text}`}>
+                  {weather.windKmh != null ? `${weather.windKmh.toFixed(0)} KM/H` : '—'}
+                </div>
+              </div>
+              {(() => {
+                const meta = WARNING_META[weather.warningLevel || 'none'] || WARNING_META.none;
+                return (
+                  <span className={`ml-auto shrink-0 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded border leading-tight text-center ${meta.cls}`}>
+                    {meta.label}
+                  </span>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className={`${cardLow} rounded-xl p-3 border flex items-center justify-between`}>
+          <span className={`text-[10px] font-mono tracking-widest uppercase flex items-center gap-1.5 ${outline}`}>
+            <Satellite className="w-3.5 h-3.5" /> // LIVE WEATHER FEED
+          </span>
+          <span className={`text-[10px] font-mono ${muted}`}>
+            {isOffline ? 'UNAVAILABLE — BACKEND OFFLINE' : 'AWAITING TELEMETRY…'}
+          </span>
+        </div>
+      )}
 
       {/* ── Telemetry KPIs ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -232,8 +343,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <RiskBadge severity={evt.severity} size="compact" />
-                  <VerificationBadge status={evt.verificationStatus} />
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <RiskBadge severity={evt.severity} size="compact" />
+                    <VerificationBadge status={evt.verificationStatus} />
+                    {evt.signalKind === 'FORECAST_RISK' && (
+                      <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-status-warning-bg/30 border border-status-warning/50 text-status-warning">
+                        PREDICTED
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <h4 className={`font-mono font-bold text-xs leading-snug ${text}`}>{evt.title.toUpperCase()}</h4>
                 <p className={`text-[11px] font-sans line-clamp-2 ${muted}`}>{evt.description}</p>
@@ -254,15 +372,42 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               <button onClick={onReportIncident} className="text-[10px] font-mono text-status-info hover:underline">+ ADD</button>
             </div>
             <div className="space-y-2">
-              {reports.slice(0, 3).map((rep) => (
-                <div key={rep.id} className={`p-2.5 ${cardLow} rounded-md border text-[11px] space-y-1`}>
-                  <div className="flex items-center justify-between">
-                    <span className={`font-mono font-bold ${text}`}>{rep.userName.toUpperCase()}</span>
-                    <VerificationBadge status={rep.verificationStatus} />
+              {reports.slice(0, 3).map((rep) => {
+                const verified = rep.verificationStatus === 'VERIFIED';
+                const remaining = Math.max(0, REPORT_VERIFY_UPVOTES - (rep.upvotes || 0));
+                return (
+                  <div key={rep.id} className={`p-2.5 ${cardLow} rounded-md border text-[11px] space-y-1.5`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`font-mono font-bold ${text}`}>{rep.userName.toUpperCase()}</span>
+                      <VerificationBadge status={rep.verificationStatus} />
+                    </div>
+                    <p className={`font-sans leading-snug ${muted}`}>{rep.description}</p>
+                    <div className={`flex items-center justify-between border-t pt-1.5 ${divider}`}>
+                      {onUpvoteReport ? (
+                        <button
+                          onClick={() => onUpvoteReport(rep.id)}
+                          disabled={verified}
+                          className={`flex items-center gap-1 font-mono font-bold transition-colors ${
+                            verified
+                              ? 'text-status-success cursor-default'
+                              : 'text-status-info hover:underline cursor-pointer'
+                          }`}
+                          title={verified ? 'Community verified' : `${remaining} more upvote${remaining === 1 ? '' : 's'} needed to verify`}
+                        >
+                          👍 {rep.upvotes || 0}
+                        </button>
+                      ) : (
+                        <span className={`font-mono ${muted}`}>👍 {rep.upvotes || 0}</span>
+                      )}
+                      <span className={`text-[9px] font-mono ${verified ? 'text-status-success' : outline}`}>
+                        {verified
+                          ? 'COMMUNITY VERIFIED'
+                          : `${remaining} MORE TO VERIFY`}
+                      </span>
+                    </div>
                   </div>
-                  <p className={`font-sans leading-snug ${muted}`}>{rep.description}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

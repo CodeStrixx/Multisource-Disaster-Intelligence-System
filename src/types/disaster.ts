@@ -75,6 +75,9 @@ export interface DisasterEvent {
   rainfallMm?: number;
   affectedPopulationEstimate?: number;
   trend?: 'worsening' | 'stable' | 'improving';
+  signalKind?: 'OBSERVED_EVENT' | 'FORECAST_RISK';
+  riskLevel?: string;
+  riskScore?: number;
 }
 
 export interface IncidentReport {
@@ -137,4 +140,29 @@ export interface RecommendationItem {
   priority: 'urgent' | 'important' | 'advisory';
   sourceCategory: 'Official Guidance (NDMA/SDMA)' | 'System Recommendation';
   isOfficial: boolean;
+}
+
+export interface GovernmentScheme {
+  id: string;
+  name: string;
+  level: 'CENTRAL' | 'STATE';
+  administeringBody: string;
+  applicableDisasterTypes: DisasterType[];
+  summary: string;
+  benefitDetails: string;
+  eligibility: string;
+  documentsRequired: string[];
+  howToApply: string[];
+  portalUrl: string;
+  helpline?: string | null;
+}
+
+export type EmergencyContactCategory = 'EMERGENCY' | 'POLICE' | 'FIRE' | 'MEDICAL' | 'DISASTER' | 'HELPLINE';
+
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  category: EmergencyContactCategory;
+  phoneNumber: string;
+  description: string;
 }

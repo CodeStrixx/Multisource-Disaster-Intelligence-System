@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { ReliefResource, ResourceType, LocationCoordinates } from '../../types/disaster';
+import { EmergencyContact, ReliefResource, ResourceType, LocationCoordinates } from '../../types/disaster';
+import { EmergencyContactsCard } from '../common/EmergencyContactsCard';
 import { LifeBuoy, MapPin, Phone, Search, Map, List, ExternalLink, ShieldCheck } from 'lucide-react';
 
 interface NearbyResourcesScreenProps {
   resources: ReliefResource[];
   currentLocation: LocationCoordinates;
+  emergencyContacts?: EmergencyContact[];
   onSelectResource: (resource: ReliefResource) => void;
   onSwitchToMap: () => void;
   isDark?: boolean;
@@ -13,6 +15,7 @@ interface NearbyResourcesScreenProps {
 export const NearbyResourcesScreen: React.FC<NearbyResourcesScreenProps> = ({
   resources,
   currentLocation,
+  emergencyContacts,
   onSelectResource,
   onSwitchToMap,
   isDark = true,
@@ -47,7 +50,12 @@ export const NearbyResourcesScreen: React.FC<NearbyResourcesScreenProps> = ({
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-5 animate-fadeIn">
-      
+
+      {/* Emergency Contacts */}
+      {emergencyContacts && emergencyContacts.length > 0 && (
+        <EmergencyContactsCard contacts={emergencyContacts} isDark={isDark} />
+      )}
+
       {/* Header Banner */}
       <div className={`${card} rounded-xl p-5 border flex flex-wrap items-center justify-between gap-4`}>
         <div>

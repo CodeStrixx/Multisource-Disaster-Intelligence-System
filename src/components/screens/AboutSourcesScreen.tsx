@@ -1,13 +1,17 @@
 import React from 'react';
 import { MOCK_DATA_SOURCES } from '../../data/mockDisasterData';
+import { DataSource } from '../../types/disaster';
 import { SourceBadge } from '../common/TrustBadges';
-import { Database, ShieldCheck, Layers, AlertTriangle, Tv, Radio } from 'lucide-react';
+import { Database, ShieldCheck, Layers, AlertTriangle, Tv, Radio, Landmark } from 'lucide-react';
 
 interface AboutSourcesScreenProps {
   isDark?: boolean;
+  sources?: DataSource[];
+  onViewSchemes?: () => void;
 }
 
-export const AboutSourcesScreen: React.FC<AboutSourcesScreenProps> = ({ isDark = true }) => {
+export const AboutSourcesScreen: React.FC<AboutSourcesScreenProps> = ({ isDark = true, sources, onViewSchemes }) => {
+  const displaySources = sources && sources.length > 0 ? sources : MOCK_DATA_SOURCES;
   const card    = isDark ? 'bg-ops-container border-ops-divider' : 'bg-white border-day-divider';
   const cardLow = isDark ? 'bg-ops-low border-ops-divider'       : 'bg-day-low border-day-divider';
   const text    = isDark ? 'text-ops-text'  : 'text-day-text';
@@ -27,6 +31,14 @@ export const AboutSourcesScreen: React.FC<AboutSourcesScreenProps> = ({ isDark =
         <p className={`text-[11px] font-mono ${muted} mt-0.5`}>
           Transparent documentation on official government sensors, regional news bureaus, crowdsourced field reports, and anti-misinformation rules.
         </p>
+        {onViewSchemes && (
+          <button
+            onClick={onViewSchemes}
+            className="mt-3 inline-flex items-center gap-1.5 bg-status-success hover:bg-emerald-500 text-white font-mono font-bold text-[10px] tracking-wider px-3 py-2 rounded-md transition-colors"
+          >
+            <Landmark className="w-3.5 h-3.5" /> BROWSE GOVERNMENT ASSISTANCE SCHEMES
+          </button>
+        )}
       </div>
 
       {/* Mandatory Emergency Disclaimer Card */}
@@ -47,7 +59,7 @@ export const AboutSourcesScreen: React.FC<AboutSourcesScreenProps> = ({ isDark =
         </h3>
 
         <div className="space-y-2.5">
-          {MOCK_DATA_SOURCES.map((src) => (
+          {displaySources.map((src) => (
             <div key={src.id} className={`p-3.5 ${cardLow} rounded-lg border flex flex-wrap items-center justify-between gap-3 text-xs`}>
               <div className="space-y-1">
                 <div className={`font-mono font-bold text-sm ${text}`}>{src.name}</div>

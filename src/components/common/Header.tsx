@@ -39,6 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
     { tab: 'dashboard', label: 'DASHBOARD' },
     { tab: 'map',       label: 'GIS MAP' },
     { tab: 'resources', label: 'RESOURCES' },
+    { tab: 'schemes',   label: 'SCHEMES' },
     { tab: 'report',    label: 'REPORT' },
     { tab: 'about',     label: 'DATA SOURCES' },
   ];

@@ -8,6 +8,7 @@ interface LocationSearchModalProps {
   onClose: () => void;
   onSelectLocation: (loc: LocationCoordinates) => void;
   currentLocation: LocationCoordinates;
+  locations?: LocationCoordinates[];
   isDark?: boolean;
 }
 
@@ -16,13 +17,15 @@ export const LocationSearchModal: React.FC<LocationSearchModalProps> = ({
   onClose,
   onSelectLocation,
   currentLocation,
+  locations,
   isDark = true,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   if (!isOpen) return null;
 
-  const filteredLocations = INITIAL_LOCATIONS.filter((loc) =>
+  const sourceLocations = locations && locations.length > 0 ? locations : INITIAL_LOCATIONS;
+  const filteredLocations = sourceLocations.filter((loc) =>
     loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     loc.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
     loc.state.toLowerCase().includes(searchQuery.toLowerCase())

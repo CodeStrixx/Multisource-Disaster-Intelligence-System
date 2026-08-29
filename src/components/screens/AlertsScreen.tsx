@@ -1,10 +1,11 @@
 import React from 'react';
-import { Alert } from '../../types/disaster';
+import { Alert, DisasterEvent } from '../../types/disaster';
 import { RiskBadge } from '../common/TrustBadges';
-import { Bell, MapPin, ArrowRight, CheckCheck, Clock } from 'lucide-react';
+import { Bell, MapPin, ArrowRight, CheckCheck, Clock, CloudSun } from 'lucide-react';
 
 interface AlertsScreenProps {
   alerts: Alert[];
+  events?: DisasterEvent[];
   onSelectAlert: (alert: Alert) => void;
   onMarkAllAsRead: () => void;
   isDark?: boolean;
@@ -12,11 +13,15 @@ interface AlertsScreenProps {
 
 export const AlertsScreen: React.FC<AlertsScreenProps> = ({
   alerts,
+  events,
   onSelectAlert,
   onMarkAllAsRead,
   isDark = true,
 }) => {
   const unreadCount = alerts.filter((a) => !a.read).length;
+  const forecastEventIds = new Set(
+    (events || []).filter((e) => e.signalKind === 'FORECAST_RISK').map((e) => e.id)
+  );
   const card    = isDark ? 'bg-ops-container border-ops-divider' : 'bg-white border-day-divider';
   const cardLow = isDark ? 'bg-ops-low border-ops-divider'       : 'bg-day-low border-day-divider';
   const text    = isDark ? 'text-ops-text'  : 'text-day-text';
@@ -59,8 +64,13 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({
             )}
 
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <RiskBadge severity={alertItem.severity} size="compact" />
+                {forecastEventIds.has(alertItem.eventId) && (
+                  <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-status-warning-bg/30 border border-status-warning/50 text-status-warning flex items-center gap-1">
+                    <CloudSun className="w-2.5 h-2.5" /> PREDICTED
+                  </span>
+                )}
                 <span className={`text-[11px] font-mono flex items-center gap-1 ${muted}`}>
                   <MapPin className="w-3 h-3 text-status-info" /> {alertItem.locationName.toUpperCase()}
                 </span>

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { DisasterEvent, ReliefResource } from '../../types/disaster';
+import { DisasterEvent, EmergencyContact, GovernmentScheme, ReliefResource } from '../../types/disaster';
+import { extractPortalUrl } from '../../services/api';
+import { EmergencyContactsCard, primaryTelHref } from '../common/EmergencyContactsCard';
 import { RiskBadge, SourceBadge, VerificationBadge, FreshnessIndicator, SeverityIndicator } from '../common/TrustBadges';
-import { ArrowLeft, CheckCircle2, AlertTriangle, LifeBuoy, FileText, Share2, MapPin, Phone, Layers, Activity, Tv, Radio, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, AlertTriangle, LifeBuoy, FileText, Share2, MapPin, Phone, Layers, Activity, Tv, Radio, Clock, Landmark, ExternalLink, ChevronRight, CloudSun } from 'lucide-react';
 
 interface EventDetailsScreenProps {
   event: DisasterEvent;
@@ -9,6 +11,9 @@ interface EventDetailsScreenProps {
   onFindHelp: () => void;
   onReportRelated: () => void;
   nearbyResources: ReliefResource[];
+  schemes?: GovernmentScheme[];
+  onViewAllSchemes?: () => void;
+  emergencyContacts?: EmergencyContact[];
   isDark?: boolean;
 }
 
@@ -18,6 +23,9 @@ export const EventDetailsScreen: React.FC<EventDetailsScreenProps> = ({
   onFindHelp,
   onReportRelated,
   nearbyResources,
+  schemes,
+  onViewAllSchemes,
+  emergencyContacts,
   isDark = true,
 }) => {
   const [activeTab, setActiveTab] = useState<'intelligence' | 'news' | 'timeline' | 'sources'>('intelligence');
@@ -77,10 +85,17 @@ export const EventDetailsScreen: React.FC<EventDetailsScreenProps> = ({
           <h1 className={`text-xl sm:text-2xl font-bold font-mono tracking-tight leading-tight ${text}`}>
             {event.title.toUpperCase()}
           </h1>
-          <div className={`flex items-center gap-2 text-xs font-mono mt-1 ${muted}`}>
-            <MapPin className="w-3.5 h-3.5 text-status-info shrink-0" />
-            <span className={`font-bold ${text}`}>{event.locationName.toUpperCase()}</span>
-            <span>({event.district.toUpperCase()}, {event.state.toUpperCase()})</span>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            {event.signalKind === 'FORECAST_RISK' && (
+              <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded border bg-status-warning-bg/30 border-status-warning/60 text-status-warning flex items-center gap-1">
+                <CloudSun className="w-3 h-3" /> PREDICTED — NOT YET OBSERVED
+              </span>
+            )}
+            <div className={`flex items-center gap-2 text-xs font-mono ${muted}`}>
+              <MapPin className="w-3.5 h-3.5 text-status-info shrink-0" />
+              <span className={`font-bold ${text}`}>{event.locationName.toUpperCase()}</span>
+              <span>({event.district.toUpperCase()}, {event.state.toUpperCase()})</span>
+            </div>
           </div>
         </div>
 
@@ -193,6 +208,52 @@ export const EventDetailsScreen: React.FC<EventDetailsScreenProps> = ({
                   </div>
                 ))}
               </div>
+
+              {/* Government Assistance Schemes */}
+              {schemes && schemes.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 text-status-success">
+                    <Landmark className="w-3.5 h-3.5" /> GOVERNMENT ASSISTANCE SCHEMES ({schemes.length})
+                  </div>
+                  {schemes.slice(0, 4).map((scheme) => {
+                    const portalHref = extractPortalUrl(scheme.portalUrl);
+                    return (
+                      <div key={scheme.id} className={`p-3 rounded-md border space-y-1 ${cardLow}`}>
+                        <div className={`font-mono font-bold text-xs leading-snug ${text}`}>{scheme.name}</div>
+                        <p className={`text-[11px] font-sans leading-relaxed line-clamp-2 ${muted}`}>{scheme.benefitDetails}</p>
+                        <div className="flex items-center justify-between text-[10px] font-mono pt-1 gap-2">
+                          <span className={`${outline} truncate`}>{scheme.administeringBody.toUpperCase()}</span>
+                          <span className="flex items-center gap-2 shrink-0">
+                            {portalHref && (
+                              <a
+                                href={portalHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-status-info hover:underline flex items-center gap-1"
+                              >
+                                <ExternalLink className="w-3 h-3" /> PORTAL
+                              </a>
+                            )}
+                            {scheme.helpline && (
+                              <a href={primaryTelHref(scheme.helpline)} className="text-status-success font-bold flex items-center gap-1">
+                                <Phone className="w-3 h-3" /> {scheme.helpline}
+                              </a>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {onViewAllSchemes && (
+                    <button
+                      onClick={onViewAllSchemes}
+                      className="text-[10px] font-mono font-bold text-status-info hover:underline flex items-center gap-1 pt-0.5"
+                    >
+                      VIEW FULL DIRECTORY &amp; APPLY STEPS <ChevronRight className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
           </div>
@@ -205,6 +266,9 @@ export const EventDetailsScreen: React.FC<EventDetailsScreenProps> = ({
               <h4 className={`font-mono font-bold text-xs tracking-wider uppercase flex items-center gap-2 ${text}`}>
                 <LifeBuoy className="w-4 h-4 text-status-info" /> // EMERGENCY DISPATCH
               </h4>
+              {emergencyContacts && emergencyContacts.length > 0 && (
+                <EmergencyContactsCard contacts={emergencyContacts} compact isDark={isDark} />
+              )}
               <p className={`text-[11px] font-sans ${muted}`}>
                 Locate verified shelters, emergency medical facilities, and relief posts near {event.locationName}.
               </p>
